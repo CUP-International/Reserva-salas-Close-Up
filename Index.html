@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reserva de Salas | Close-Up International</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --rojo:#D61726; --rojo-osc:#A01020; --rojo-cla:#E8404F; --rojo-suave:#F5D0D3;
+    --carbon:#1D1D1B; --negro:#0D0D0D; --gris:#6B6B6B; --gris-logo:#DBDAD9; --crema:#F5F3EE; --blanco:#fff;
+    --fila:44px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  [hidden]{display:none!important}
+  body{font-family:'Montserrat',sans-serif;color:var(--carbon);background:var(--crema);min-height:100vh;display:flex;flex-direction:column}
+  body.sin-scroll{overflow:hidden}
+  button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+
+  /* Header */
+  header{background:var(--carbon);color:#fff;border-bottom:2px solid var(--rojo)}
+  .header-in{max-width:1200px;margin:0 auto;padding:22px 24px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+  .logo{width:170px;height:auto;display:block}
+  .header-txt{text-align:right}
+  .eyebrow{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--rojo-cla)}
+  .header-txt h1{font-size:26px;font-weight:900;letter-spacing:-.02em;line-height:1.05;margin-top:4px}
+
+  main{max-width:1200px;width:100%;margin:0 auto;padding:28px 24px 48px;flex:1}
+
+  /* Barra de fecha */
+  .barra{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+  .fecha-titulo .eyebrow{color:var(--rojo)}
+  .fecha-titulo h2{font-size:28px;font-weight:900;letter-spacing:-.02em;line-height:1.1;margin-top:4px}
+  .nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .btn{border:1.5px solid var(--carbon);background:#fff;padding:9px 16px;font-weight:600;font-size:13px;cursor:pointer;border-radius:4px;transition:background .15s,color .15s;text-decoration:none;display:inline-block}
+  .btn:hover{background:var(--carbon);color:#fff}
+  .btn:focus-visible{outline:2px solid var(--rojo);outline-offset:2px}
+  .btn-icon{width:40px;padding:9px 0;text-align:center}
+  .btn-primario{background:var(--rojo);border-color:var(--rojo);color:#fff}
+  .btn-primario:hover{background:var(--rojo-osc);border-color:var(--rojo-osc)}
+  .btn-primario:disabled{opacity:.5;cursor:not-allowed}
+  .btn-texto{border:none;background:none;color:var(--gris);text-decoration:underline}
+  .btn-texto:hover{background:none;color:var(--carbon)}
+  .btn-peligro{border-color:var(--rojo);color:var(--rojo)}
+  .btn-peligro:hover{background:var(--rojo);color:#fff}
+  .btn-peligro:disabled{opacity:.5;cursor:not-allowed}
+  .btn-chico{padding:7px 12px;font-size:12px}
+  input[type=date]{border:1.5px solid var(--gris-logo);background:#fff;padding:8px 10px;border-radius:4px;font-weight:500}
+
+  .info{display:flex;gap:20px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--gris);margin-bottom:14px}
+  .leyenda{display:flex;align-items:center;gap:6px}
+  .sw{width:14px;height:14px;border-radius:2px;display:inline-block}
+  .sw-libre{background:#fff;border:1px solid var(--gris-logo)}
+  .sw-ocupado{background:var(--carbon)}
+  .sw-pasado{background:repeating-linear-gradient(45deg,#eee,#eee 3px,#f7f7f7 3px,#f7f7f7 6px);border:1px solid var(--gris-logo)}
+
+  .aviso-demo{background:var(--rojo-suave);border-left:3px solid var(--rojo);padding:10px 14px;font-size:13px;margin-bottom:16px;border-radius:0 4px 4px 0}
+
+  /* Grilla */
+  .tarjeta{background:#fff;border:1px solid var(--gris-logo);border-radius:6px;overflow:hidden}
+  .grilla{display:grid;grid-template-columns:76px repeat(var(--salas,2),minmax(0,1fr));grid-template-rows:auto;grid-auto-rows:var(--fila);position:relative}
+  .cab{grid-row:1;height:auto;padding:14px 16px;border-bottom:2px solid var(--carbon);background:#fff;position:sticky;top:0;z-index:3}
+  .cab h3{font-size:16px;font-weight:700;letter-spacing:-.01em}
+  .cab p{font-size:11px;color:var(--gris);font-weight:600;letter-spacing:.16em;text-transform:uppercase;margin-top:2px}
+  .cab-hora{border-right:1px solid var(--gris-logo)}
+  .hora{grid-column:1;font-size:12px;font-weight:600;color:var(--gris);padding:4px 10px 0;border-right:1px solid var(--gris-logo);text-align:right}
+  .hora.media{color:#aaa;font-weight:500}
+  .celda{border:none;border-top:1px solid #eeedeb;border-left:1px solid var(--gris-logo);background:#fff;cursor:pointer;position:relative;transition:background .12s;border-radius:0;text-align:left;padding:0 12px;font-size:12px;color:transparent;font-weight:600}
+  .celda.en-punto{border-top-color:var(--gris-logo)}
+  .celda:hover,.celda:focus-visible{background:var(--rojo-suave);color:var(--rojo-osc);outline:none}
+  .celda:disabled{cursor:not-allowed}
+  .celda:disabled:hover{background:inherit;color:transparent}
+  .celda.pasado,.celda.pasado:hover{background:repeating-linear-gradient(45deg,#f2f2f2,#f2f2f2 4px,#fafafa 4px,#fafafa 8px)}
+  .celda.fuera,.celda.fuera:hover{background:#fafafa}
+  .reserva{margin:2px 4px;border:none;background:var(--carbon);color:#fff;border-radius:4px;padding:6px 10px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;gap:2px;text-align:left;position:relative;z-index:1;box-shadow:inset 3px 0 0 var(--rojo)}
+  .reserva:hover{background:var(--negro)}
+  .reserva:focus-visible{outline:2px solid var(--rojo);outline-offset:1px}
+  .reserva.pasada{opacity:.55}
+  .reserva .r-hora{font-size:11px;font-weight:600;color:var(--gris-logo);letter-spacing:.04em}
+  .reserva .r-nombre{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .reserva .r-motivo{font-size:12px;color:var(--gris-logo);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cargando{padding:40px;text-align:center;color:var(--gris);font-size:14px}
+  .vacio{padding:56px 24px;text-align:center;display:grid;gap:10px;justify-items:center}
+  .vacio h3{font-size:20px;font-weight:900;letter-spacing:-.02em}
+  .vacio p{color:var(--gris);font-size:14px}
+
+  /* Modal */
+  .fondo{position:fixed;inset:0;background:rgba(13,13,13,.6);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
+  .fondo.abierto{display:flex}
+  .modal{background:#fff;width:100%;max-width:480px;border-radius:6px;overflow:hidden;max-height:calc(100vh - 40px);overflow-y:auto}
+  .modal-cab{background:var(--carbon);color:#fff;padding:20px 24px;border-bottom:2px solid var(--rojo)}
+  .modal-cab h3{font-size:22px;font-weight:900;letter-spacing:-.02em;margin-top:4px}
+  .modal-cuerpo{padding:22px 24px;display:grid;gap:14px}
+  .fila2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  label{display:block;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gris);margin-bottom:6px}
+  .campo input,.campo select,.campo textarea{width:100%;border:1.5px solid var(--gris-logo);border-radius:4px;padding:10px 12px;background:#fff;font-size:14px}
+  .campo input:focus,.campo select:focus,.campo textarea:focus{outline:none;border-color:var(--carbon)}
+  .campo textarea{resize:vertical;min-height:64px}
+  .resumen{background:var(--crema);padding:12px 14px;border-radius:4px;font-size:14px;line-height:1.5}
+  .resumen strong{font-weight:700}
+  .error{color:var(--rojo-osc);font-size:13px;font-weight:600;min-height:1em}
+  .nota{font-size:13px;color:var(--gris);line-height:1.5}
+  .check{display:flex;gap:8px;align-items:center;font-size:14px;text-transform:none;letter-spacing:0;color:var(--carbon);font-weight:500;margin:0;cursor:pointer}
+  .check input{width:16px;height:16px;accent-color:var(--rojo)}
+  .modal-pie{display:flex;justify-content:flex-end;gap:10px;padding:0 24px 22px;flex-wrap:wrap}
+  .detalle dt{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gris);margin-top:10px}
+  .detalle dt:first-child{margin-top:0}
+  .detalle dd{font-size:15px;font-weight:500;margin-top:2px}
+  .sep{height:1px;background:var(--gris-logo);margin:4px 0}
+  .acciones-cal{display:flex;gap:8px;flex-wrap:wrap}
+  .lista-mis{list-style:none;display:grid;gap:8px}
+  .lista-mis button{width:100%;text-align:left;border:1.5px solid var(--gris-logo);background:#fff;border-radius:4px;padding:10px 12px;cursor:pointer;display:grid;gap:2px}
+  .lista-mis button:hover,.lista-mis button:focus-visible{border-color:var(--carbon);outline:none}
+  .lista-mis .m-fecha{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--rojo)}
+  .lista-mis .m-txt{font-size:14px;font-weight:600}
+  .lista-mis .m-sub{font-size:12px;color:var(--gris)}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--carbon);color:#fff;padding:12px 20px;border-radius:4px;font-size:14px;font-weight:500;opacity:0;transition:all .25s;z-index:60;border-left:3px solid var(--rojo);pointer-events:none}
+  .toast.visible{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  footer{border-top:1px solid var(--gris-logo);background:#fff}
+  .footer-in{max-width:1200px;margin:0 auto;padding:16px 24px;display:flex;justify-content:space-between;font-size:12px;color:var(--gris);flex-wrap:wrap;gap:8px}
+
+  @media (max-width:640px){
+    .header-txt{text-align:left}
+    .header-txt h1{font-size:22px}
+    .fecha-titulo h2{font-size:22px}
+    .grilla{grid-template-columns:56px repeat(var(--salas,2),minmax(0,1fr))}
+    .hora{padding:4px 6px 0;font-size:11px}
+    .cab{padding:10px}
+    .fila2{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-in">
+    <!-- Logo oficial Close-Up (versión blanca sobre carbón) -->
+    <svg class="logo" role="img" aria-label="Close-Up International" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 516.2 152.8"><defs><style>.cls-1{fill:#fff}</style></defs><g><path d="m2.9 151.9.4-2.4 249.4.9-.5 2.4zm203.2-76.7q4-14.3 23-14.2h16.6q16.9 0 18.1 8.8.4 2.5-.5 5.6l-.6 2.4Q258.8 92 237.3 92h-11.9q-7 0-8.4 4.7l-.2 1.8q.4 3 6 3h33.4l-2.6 9.6-35.7-.1q-16.5 0-17.8-9.2-.4-2.7.6-6.4zm14.7 7.4 4.8-.2h12q7.1 0 8.4-4.7l.6-2.4q.3-1 .2-1.8-.5-3-6-3h-9.5q-7.2 0-8.5 4.9zm-38.5-2.7q16.7 0 18 8.8.4 2.4-.5 5.5l-.6 2.4q-3.9 14.3-25.3 14.2H138l2.6-9.6 33.4.1q7 0 8.4-4.7l.7-2.4q.2-1 0-1.9-.3-3-6-2.9h-11.8q-16.8 0-18.1-8.8-.3-2.4.5-5.6 3.9-14.3 25.3-14.2l35.8.1-2.6 9.5h-33.4q-7.2-.1-8.4 4.7-.3 1-.2 1.8.5 3 6 3zm-53.6-.2q.6-2.4.4-4.2-.9-5.3-9.7-5.4-12 0-14.5 9.5l-3.3 12q-.6 2.4-.3 4.1.7 5.4 9.7 5.4 11.9 0 14.5-9.5zm-29.8 30.9q-13.5 0-14.9-9.5-.6-4 1-9.6l3.2-12q5.1-19 24.2-19l21.5.2q11.2 0 12.5 8.7.6 4.2-1 10.4l-3.2 11.9q-5.2 19-24.3 19zM73.3 91.4q-.6 2.4-.3 4.2.7 5.4 9.7 5.4l-2.6 9.5h-9.5q-13.5 0-14.9-9.5-.5-4 1-9.6l12.8-47.6h16.7zm-7.5-38.1L42 53.2q-16.6 0-23.1 23.7-2.5 9-1.6 14.6 1.3 9.3 11.8 9.3h23.8l-2.6 9.6H21.7Q2.5 110.1.3 95.1q-1-7.4 1.9-18.3 9-33.3 37.6-33.3l28.6.1zm-55.1 68-6.3 21.1h2.2l6.4-21.1zm3.6 21.2 3-10.2.8-2.6.6-2.5.6-2.3.1 2.3.3 4.3 1 11h2l6.4-21.2h-2L24 131.6l-1.8 7.2H22l-.4-6-.9-11.5h-2.2l-6.3 21.2zm16.4 0H33l5.7-19h3.8l.6-2.1-9.9-.1-.6 2.2h3.8zm21.4-12h-5.3l2.2-7.1h5.5l.6-2h-7.8L41 142.6h8.2l.6-2.1h-6l2.5-8h5.2zm1.6 12.1H56l2.7-9.3h1q.9 0 1.5.4t.7 1.3v2.4q0 1.2-.2 2.3v3h2.2v-2l.3-3.4q0-2.1-.2-3.3-.4-1-1.3-1.5l2-1a8 8 0 0 0 3.1-5.5v-1.8q-.3-.8-.8-1.5t-1.4-1-2.2-.3l-3.4.3zm8-19.2.6-.2h.7q1 0 1.6.4.5.4.8 1v1.5a7 7 0 0 1-1.7 3.8q-.7.8-1.5 1.2t-1.8.4h-1.1zm8.3 19.3 3.1-10.2.8-2.6.6-2.5.6-2.3v2.3l.4 4.2 1 11h2l6.3-21h-2l-3 10.2-1.9 7.2-.4-6-1-11.5h-2.1l-6.3 21.1zm23.4-6.4-.5 6.4h2.2l1.7-21.1h-2.6l-11 21.1h2.2l3.3-6.4zm-3.9-1.8 2.8-5.5.7-1.5q.5-.7.8-1.7l.8-1.6-.1 1.6-.2 1.7-.2 1.6-.5 5.4zm10.4 8.3h2.3l5.7-19.1h3.8l.6-2.1h-9.9l-.6 2.1h3.8zm16.6-21.2-6.3 21.2h2.3l6.3-21.2zm13-.2q-1 0-2 .4-1.2.5-2.1 1.3t-1.8 2.1a21 21 0 0 0-2.8 5.6 30 30 0 0 0-1.4 6.8 10 10 0 0 0 .4 3l.7 1.2q.4.5 1.1 1t1.7.3 2.1-.4a7 7 0 0 0 2-1.4q1-.8 1.8-2l1.5-2.6a29 29 0 0 0 2.6-10.2l-.2-1.8q0-.9-.5-1.6t-1.1-1.2q-.8-.5-2-.5m-.6 2q.9 0 1.3.5.4.3.6 1l.1 1.6a24 24 0 0 1-5 13.7q-.4.4-1 .6-.5.3-1 .3-.7 0-1.2-.4-.5-.3-.6-.8l-.3-1.2v-2.4a21 21 0 0 1 1-4 32 32 0 0 1 2.8-6.4l1.2-1.5 1-.7zm7 19.5 3-10.2.7-2.6.7-2.5.5-2.3h.1v2.3l.3 4.3 1 11h2l6.4-21.2h-2l-3 10.3-2 7.2-.3-6-1-11.5h-2.1l-6.4 21.2zm23.3-6.4-.5 6.4h2.2l1.6-21.1H160l-11 21.1h2.2l3.2-6.4zm-4-1.8 2.8-5.4.8-1.6.8-1.6.7-1.7h.1l-.2 1.6-.2 1.7-.1 1.6-.5 5.4zm10 8.3h8l.6-2H168l5.7-19.2h-2.2zM445 87.9l3.3-14.3q.8-2.8.3-5-1.2-6.4-11.9-6.4h-14.3l-8.7 37H428q14.3 0 17-11.3" class="cls-1"/><path d="M514.2 22.2c-12.4-30.4-73.5-28-135.8-2.4-62.2 25.5-112 73.3-99.5 103.7 10.4 25.4 55.4 27.6 106.3 12.8l20-85.6 45.7.1q16.1 0 18.1 11.4 1 4.8-.7 11.5L465 88q-5.4 22.8-28.2 22.7H411l-4.3 18.4 9-3.5c62.2-25.5 111-73 98.5-103.4m-200.9 71-23.9-.1v-8.4h24zm75.6-5.4c-1.8 8.4-7.5 22-26.6 22h-23.9Q324 109.8 321 98c-1.1-4.2.7-11.5 2.2-18l7.9-35c7.7-4.3 15.5-10.2 23.2-13.6l-11.8 49.1c-1.3 5.3-2.4 11.6-1.2 13.8 1.6 3 2.5 4.2 9.5 4.4 8.5.3 16-1 20-18.3l7-30 19.3.6z" class="cls-1"/><path d="M385 136.7c7.6-2.2 15.2-4.3 21.5-7l.2-.6q-10.8 4-21.5 7.2z" class="cls-1"/></g></svg>
+    <div class="header-txt">
+      <div class="eyebrow">Uso interno</div>
+      <h1>Reserva de Salas</h1>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div id="avisoDemo" class="aviso-demo" hidden>
+    <strong>Modo demostración:</strong> las reservas no se comparten entre usuarios y se pierden al recargar. Para usarla en serio, la página tiene que publicarse desde Google Apps Script junto con <code>Code.gs</code>.
+  </div>
+
+  <div class="barra">
+    <div class="fecha-titulo">
+      <div class="eyebrow" id="eyebrowHorario">Disponibilidad</div>
+      <h2 id="tituloFecha">—</h2>
+    </div>
+    <div class="nav">
+      <button type="button" class="btn btn-icon" id="btnAnt" aria-label="Día anterior">‹</button>
+      <button type="button" class="btn" id="btnHoy">Hoy</button>
+      <button type="button" class="btn btn-icon" id="btnSig" aria-label="Día siguiente">›</button>
+      <input type="date" id="inputFecha" aria-label="Elegir fecha">
+      <button type="button" class="btn" id="btnMis">Mis reservas</button>
+    </div>
+  </div>
+
+  <div class="info">
+    <span class="leyenda"><span class="sw sw-libre"></span>Disponible — hacé clic para reservar</span>
+    <span class="leyenda"><span class="sw sw-ocupado"></span>Reservado</span>
+    <span class="leyenda"><span class="sw sw-pasado"></span>Horario pasado</span>
+  </div>
+
+  <div class="tarjeta">
+    <div class="grilla" id="grilla"><div class="cargando" style="grid-column:1/-1">Cargando disponibilidad…</div></div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-in">
+    <span>Close-Up International · Reserva de salas</span>
+    <span id="pieUsuario"></span>
+  </div>
+</footer>
+
+<!-- Modal: nueva reserva -->
+<div class="fondo" id="modalReserva" role="dialog" aria-modal="true" aria-labelledby="tituloReserva">
+  <form class="modal" id="formReserva" novalidate>
+    <div class="modal-cab">
+      <div class="eyebrow">Nueva reserva</div>
+      <h3 id="tituloReserva">Reservar sala</h3>
+    </div>
+    <div class="modal-cuerpo">
+      <div class="fila2">
+        <div class="campo"><label for="fSala">Sala</label><select id="fSala"></select></div>
+        <div class="campo"><label for="fFecha">Fecha</label><input type="date" id="fFecha" required></div>
+      </div>
+      <div class="fila2">
+        <div class="campo"><label for="fInicio">Desde</label><select id="fInicio"></select></div>
+        <div class="campo"><label for="fDuracion">Duración</label><select id="fDuracion"></select></div>
+      </div>
+      <div class="campo"><label for="fRepetir">Repetir</label><select id="fRepetir"></select></div>
+      <div class="resumen" id="fResumen"></div>
+      <div class="sep"></div>
+      <div class="campo"><label for="fNombre">Nombre y apellido</label><input id="fNombre" autocomplete="name" required maxlength="80"></div>
+      <div class="campo" id="campoEmail"><label for="fEmail">Email corporativo</label><input id="fEmail" type="email" autocomplete="email" required maxlength="120"></div>
+      <div class="campo"><label for="fMotivo">Motivo / reunión</label><textarea id="fMotivo" maxlength="200" placeholder="Ej.: Reunión de planificación Q1"></textarea></div>
+      <div class="error" id="fError" aria-live="polite"></div>
+    </div>
+    <div class="modal-pie">
+      <button type="button" class="btn btn-texto" data-cerrar>Cancelar</button>
+      <button type="submit" class="btn btn-primario" id="btnConfirmar">Confirmar reserva</button>
+    </div>
+  </form>
+</div>
+
+<!-- Modal: reserva confirmada -->
+<div class="fondo" id="modalOk" role="dialog" aria-modal="true" aria-labelledby="tituloOk">
+  <div class="modal">
+    <div class="modal-cab">
+      <div class="eyebrow">Listo</div>
+      <h3 id="tituloOk">Reserva confirmada</h3>
+    </div>
+    <div class="modal-cuerpo">
+      <div class="resumen" id="okResumen"></div>
+      <p class="nota" id="okNota"></p>
+      <div>
+        <label>Agregar a tu calendario</label>
+        <div class="acciones-cal">
+          <a class="btn btn-chico" id="okOutlook" target="_blank" rel="noopener">Outlook</a>
+          <a class="btn btn-chico" id="okGoogle" target="_blank" rel="noopener">Google Calendar</a>
+          <button type="button" class="btn btn-chico" id="okIcs">Descargar .ics</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-pie">
+      <button type="button" class="btn btn-primario" data-cerrar>Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: detalle / cancelar -->
+<div class="fondo" id="modalDetalle" role="dialog" aria-modal="true" aria-labelledby="tituloDetalle">
+  <form class="modal" id="formCancelar" novalidate>
+    <div class="modal-cab">
+      <div class="eyebrow">Reserva</div>
+      <h3 id="tituloDetalle">Detalle</h3>
+    </div>
+    <div class="modal-cuerpo">
+      <dl class="detalle" id="dDetalle"></dl>
+      <div class="sep"></div>
+      <label class="check" id="cSerieFila"><input type="checkbox" id="cSerie"> Cancelar también las siguientes de la serie</label>
+      <p class="nota" id="cNota"></p>
+      <div class="error" id="cError" aria-live="polite"></div>
+    </div>
+    <div class="modal-pie">
+      <button type="button" class="btn btn-texto" data-cerrar>Cerrar</button>
+      <button type="submit" class="btn btn-peligro" id="btnCancelarReserva">Cancelar reserva</button>
+    </div>
+  </form>
+</div>
+
+<!-- Modal: mis reservas -->
+<div class="fondo" id="modalMis" role="dialog" aria-modal="true" aria-labelledby="tituloMis">
+  <div class="modal">
+    <div class="modal-cab">
+      <div class="eyebrow">Próximas</div>
+      <h3 id="tituloMis">Mis reservas</h3>
+    </div>
+    <div class="modal-cuerpo">
+      <ul class="lista-mis" id="listaMis"></ul>
+      <p class="nota" id="misNota"></p>
+    </div>
+    <div class="modal-pie">
+      <button type="button" class="btn btn-texto" data-cerrar>Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ================== CONFIGURACIÓN ==================
+   Dentro de Apps Script estos valores se reemplazan por los de Code.gs
+   (única fuente de verdad). Acá solo se usan en modo demostración. */
+const CONFIG = {
+  ZONA: 'America/Argentina/Buenos_Aires',
+  DOMINIOS: ['close-upinternational.com.ar', 'close-upinternational.com'],
+  SALAS: [
+    { id: 'grande', nombre: 'Sala Grande' },
+    { id: 'chica',  nombre: 'Sala Chica'  }
+  ],
+  HORA_INICIO: 8 * 60,
+  HORA_FIN: 19 * 60,
+  PASO: 30,
+  DIAS_ANTICIPACION: 90,
+  FINES_DE_SEMANA: false,
+  MAX_REPETICIONES: 12,
+  REFRESCO_SEG: 60
+};
+/* =================================================== */
+
+const $ = s => document.querySelector(s);
+const pad = n => String(n).padStart(2, '0');
+const aHora = m => `${pad(Math.floor(m / 60))}:${pad(m % 60)}`;
+const durTexto = m => m < 60 ? `${m} min` : (m % 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m / 60} h`);
+const nombreSala = id => (CONFIG.SALAS.find(s => s.id === id) || {}).nombre || id;
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const emailValido = e => { const m = /^[^\s@]+@([^\s@]+\.[^\s@]+)$/.exec(e.trim().toLowerCase()); return !!m && CONFIG.DOMINIOS.includes(m[1]); };
+const orden = (a, b) => a.fecha.localeCompare(b.fecha) || a.inicio - b.inicio;
+
+/* ---------- Fechas (siempre en la zona horaria de la oficina) ---------- */
+const fechaUTC = f => { const [y, m, d] = f.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d, 12)); };
+const sumarDias = (f, n) => { const d = fechaUTC(f); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+const diaSemana = f => fechaUTC(f).getUTCDay();
+const fechaTexto = (f, o) => fechaUTC(f).toLocaleDateString('es-AR', { ...o, timeZone: 'UTC' });
+function ahoraZona() {
+  const p = {};
+  new Intl.DateTimeFormat('en-CA', { timeZone: CONFIG.ZONA, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+    .formatToParts(new Date()).forEach(x => { p[x.type] = x.value; });
+  return { fecha: `${p.year}-${p.month}-${p.day}`, min: +p.hour * 60 + +p.minute };
+}
+const hoyISO = () => ahoraZona().fecha;
+const esFinde = f => !CONFIG.FINES_DE_SEMANA && [0, 6].includes(diaSemana(f));
+const proximoHabil = f => { while (esFinde(f)) f = sumarDias(f, 1); return f; };
+const fechaMax = () => sumarDias(hoyISO(), CONFIG.DIAS_ANTICIPACION);
+const slots = () => { const a = []; for (let m = CONFIG.HORA_INICIO; m < CONFIG.HORA_FIN; m += CONFIG.PASO) a.push(m); return a; };
+const ocupa = (r, m) => m < r.fin && m + CONFIG.PASO > r.inicio;
+function slotPasado(f, m) { const a = ahoraZona(); return f < a.fecha || (f === a.fecha && m + CONFIG.PASO <= a.min); }
+function terminada(r) { const a = ahoraZona(); return r.fecha < a.fecha || (r.fecha === a.fecha && r.fin <= a.min); }
+function offsetZona(f) {
+  try {
+    const t = new Intl.DateTimeFormat('en-US', { timeZone: CONFIG.ZONA, timeZoneName: 'longOffset' })
+      .formatToParts(fechaUTC(f)).find(x => x.type === 'timeZoneName').value;
+    const m = /GMT([+-]\d{2}:\d{2})/.exec(t);
+    return m ? m[1] : '+00:00';
+  } catch { return '-03:00'; }
+}
+
+/* ---------- Datos guardados en este navegador ---------- */
+const almacen = {
+  leer(k, def) { try { return JSON.parse(localStorage.getItem(k)) ?? def; } catch { return def; } },
+  guardar(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+const K_TOKENS = 'salas.tokens', K_PERFIL = 'salas.perfil';
+function misTokens() { const hoy = hoyISO(); return almacen.leer(K_TOKENS, []).filter(t => t && t.id && t.fecha >= hoy); }
+function guardarToken(id, token, fecha) { const l = misTokens().filter(t => t.id !== id); l.push({ id, token, fecha }); almacen.guardar(K_TOKENS, l.slice(-300)); }
+function quitarToken(id) { almacen.guardar(K_TOKENS, misTokens().filter(t => t.id !== id)); }
+const tokenDe = id => (misTokens().find(t => t.id === id) || {}).token || '';
+
+/* ---------- Capa de datos ---------- */
+const enAppsScript = typeof google !== 'undefined' && google.script && google.script.run;
+
+function llamar(fn, ...args) {
+  return new Promise((ok, mal) => google.script.run
+    .withSuccessHandler(ok)
+    .withFailureHandler(e => mal(new Error(String((e && e.message) || e || 'Error de conexión').replace(/^(Error|Exception):\s*/, ''))))
+    [fn](...args));
+}
+const apiRemota = {
+  info: () => llamar('info'),
+  listar: f => llamar('listar', f),
+  obtener: id => llamar('obtener', id),
+  crear: d => llamar('crear', d),
+  cancelar: (id, token, serie) => llamar('cancelar', id, token, serie),
+  misReservas: pares => llamar('misReservas', pares)
+};
+
+const apiDemo = (() => {
+  const dia = proximoHabil(hoyISO());
+  const datos = [
+    { id: 'd1', serie: '', sala: 'grande', fecha: dia, inicio: 600, fin: 690, nombre: 'Equipo Comercial', motivo: 'Revisión mensual de performance', token: 'demo' },
+    { id: 'd2', serie: '', sala: 'chica',  fecha: dia, inicio: 840, fin: 900, nombre: 'María López', motivo: 'Entrevista', token: 'demo' }
+  ];
+  const pub = ({ token, ...r }) => ({ ...r, propia: false });
+  const espera = () => new Promise(r => setTimeout(r, 150));
+  const uid = () => Math.random().toString(36).slice(2, 10);
+  return {
+    async info() { return { usuario: '', config: null }; },
+    async listar(f) { await espera(); return datos.filter(r => r.fecha === f).map(pub); },
+    async obtener(id) { await espera(); const r = datos.find(x => x.id === id); return r ? pub(r) : null; },
+    async crear(d) {
+      await espera();
+      const n = d.repeticiones || 1, fechas = Array.from({ length: n }, (_, k) => sumarDias(d.fecha, 7 * k));
+      const choques = fechas.filter(f => datos.some(r => r.sala === d.sala && r.fecha === f && d.inicio < r.fin && d.fin > r.inicio));
+      if (choques.length) throw new Error(n === 1 ? 'Ese horario ya fue reservado. Elegí otro.'
+        : `La serie choca con otras reservas el ${choques.map(f => fechaTexto(f, { day: 'numeric', month: 'numeric' })).join(', ')}. Elegí otro horario.`);
+      const token = uid() + uid(), serie = n > 1 ? uid() : '';
+      const nuevas = fechas.map(f => ({ id: uid(), serie, sala: d.sala, fecha: f, inicio: d.inicio, fin: d.fin, nombre: d.nombre, motivo: d.motivo, token }));
+      datos.push(...nuevas);
+      return { reservas: nuevas.map(pub), token, email: false };
+    },
+    async cancelar(id, token, serie) {
+      await espera();
+      const r = datos.find(x => x.id === id);
+      if (!r) throw new Error('La reserva ya no existe o ya fue cancelada.');
+      if (!token || r.token !== token) throw new Error('Solo quien hizo la reserva puede cancelarla.');
+      const obj = serie && r.serie ? datos.filter(x => x.serie === r.serie && x.fecha >= r.fecha) : [r];
+      obj.forEach(x => datos.splice(datos.indexOf(x), 1));
+      return { canceladas: obj.map(x => x.id) };
+    },
+    async misReservas(pares) {
+      await espera(); const hoy = hoyISO();
+      return datos.filter(r => r.fecha >= hoy && pares.some(p => p.id === r.id && p.token === r.token)).sort(orden).map(pub);
+    }
+  };
+})();
+
+const api = enAppsScript ? apiRemota : apiDemo;
+
+/* ---------- Estado ---------- */
+let fechaActual = hoyISO();
+let reservas = [];
+let reservaSel = null;
+let usuario = '';
+let pedido = 0;
+let ultimaConfirmada = null;
+
+/* ---------- Render ---------- */
+function render() {
+  const g = $('#grilla');
+  if (esFinde(fechaActual)) {
+    const prox = proximoHabil(fechaActual);
+    g.innerHTML = `<div class="vacio" style="grid-column:1/-1">
+      <h3>Fin de semana</h3><p>Las salas no se reservan sábados ni domingos.</p>
+      <button type="button" class="btn" data-ir="${prox}">Ir al ${esc(fechaTexto(prox, { weekday: 'long', day: 'numeric', month: 'long' }))}</button></div>`;
+    return;
+  }
+  const HI = CONFIG.HORA_INICIO, HF = CONFIG.HORA_FIN, P = CONFIG.PASO;
+  const fila = m => 2 + Math.floor((m - HI) / P);
+  const fuera = fechaActual > fechaMax();
+  let html = `<div class="cab cab-hora"></div>`;
+  CONFIG.SALAS.forEach((s, i) => html += `<div class="cab" style="grid-column:${i + 2}"><h3>${esc(s.nombre)}</h3><p>${libresTexto(s.id)}</p></div>`);
+  slots().forEach(m => html += `<div class="hora ${m % 60 ? 'media' : ''}" style="grid-row:${fila(m)}">${aHora(m)}</div>`);
+
+  CONFIG.SALAS.forEach((s, i) => {
+    const col = i + 2;
+    const rs = reservas.filter(r => r.sala === s.id);
+    slots().forEach(m => {
+      if (rs.some(r => ocupa(r, m))) return;
+      const pasado = slotPasado(fechaActual, m);
+      const bloq = pasado || fuera;
+      html += `<button type="button" class="celda ${m % 60 ? '' : 'en-punto'} ${pasado ? 'pasado' : fuera ? 'fuera' : ''}" style="grid-column:${col};grid-row:${fila(m)}"
+        ${bloq ? 'disabled' : ''} data-sala="${esc(s.id)}" data-inicio="${m}" aria-label="${esc(s.nombre)} ${aHora(m)} ${bloq ? 'no disponible' : 'disponible'}">${bloq ? '' : '+ ' + aHora(m)}</button>`;
+    });
+    rs.forEach(r => {
+      // Tolera reservas cargadas a mano fuera de la grilla de 30 min o del horario
+      const ini = Math.max(HI, r.inicio), fin = Math.min(HF, r.fin);
+      if (fin <= ini) return;
+      const desde = fila(ini), filas = Math.max(1, 2 + Math.ceil((fin - HI) / P) - desde);
+      html += `<button type="button" class="reserva ${terminada(r) ? 'pasada' : ''}" style="grid-column:${col};grid-row:${desde} / span ${filas}" data-id="${esc(r.id)}"
+        aria-label="${esc(s.nombre)}, ${aHora(r.inicio)} a ${aHora(r.fin)}, ${esc(r.nombre)}">
+        <span class="r-hora">${aHora(r.inicio)} – ${aHora(r.fin)}${r.serie ? ' · ↻' : ''}</span>
+        <span class="r-nombre">${esc(r.nombre)}</span>
+        ${filas > 1 && r.motivo ? `<span class="r-motivo">${esc(r.motivo)}</span>` : ''}
+      </button>`;
+    });
+  });
+  g.innerHTML = html;
+}
+
+function libresTexto(sala) {
+  if (fechaActual < hoyISO()) return 'Día pasado';
+  if (fechaActual > fechaMax()) return 'Aún no habilitado';
+  const rs = reservas.filter(r => r.sala === sala);
+  const libre = slots().filter(m => !slotPasado(fechaActual, m) && !rs.some(r => ocupa(r, m))).length * CONFIG.PASO;
+  return libre ? `${durTexto(libre)} libres` : 'Sin disponibilidad';
+}
+
+function pintarFecha() {
+  const t = fechaTexto(fechaActual, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  $('#tituloFecha').textContent = t.charAt(0).toUpperCase() + t.slice(1);
+  $('#inputFecha').value = fechaActual;
+}
+
+async function cargar(silencioso = false) {
+  const mio = ++pedido, fecha = fechaActual;
+  pintarFecha();
+  if (esFinde(fecha)) { reservas = []; render(); return; }
+  if (!silencioso) $('#grilla').innerHTML = `<div class="cargando" style="grid-column:1/-1">Cargando disponibilidad…</div>`;
+  try {
+    const rs = await api.listar(fecha);
+    if (mio !== pedido) return; // llegó una respuesta vieja: la descartamos
+    reservas = rs.map(r => ({ ...r, id: String(r.id), inicio: +r.inicio, fin: +r.fin }));
+    render();
+  } catch (e) {
+    if (mio !== pedido) return;
+    $('#grilla').innerHTML = `<div class="cargando" style="grid-column:1/-1">No se pudo cargar la disponibilidad. ${esc(e.message)}<br><br><button type="button" class="btn" data-reintentar>Reintentar</button></div>`;
+  }
+}
+
+function moverDia(delta) {
+  let f = sumarDias(fechaActual, delta);
+  while (esFinde(f)) f = sumarDias(f, delta);
+  fechaActual = f; cargar();
+}
+
+/* ---------- Modales (foco y scroll) ---------- */
+let focoPrevio = null;
+function abrir(sel, enfocar) {
+  if (!document.querySelector('.fondo.abierto')) focoPrevio = document.activeElement;
+  $(sel).classList.add('abierto');
+  document.body.classList.add('sin-scroll');
+  setTimeout(() => (enfocar ? $(enfocar) : focusables($(sel))[0])?.focus(), 30);
+}
+function cerrarModal(fondo, devolverFoco = true) {
+  fondo.classList.remove('abierto');
+  if (!document.querySelector('.fondo.abierto')) {
+    document.body.classList.remove('sin-scroll');
+    if (devolverFoco && focoPrevio && focoPrevio.isConnected) focoPrevio.focus();
+  }
+}
+const focusables = el => [...el.querySelectorAll('button,a[href],input,select,textarea')].filter(x => !x.disabled && x.offsetParent !== null);
+
+/* ---------- Nueva reserva ---------- */
+function validarFecha(f) {
+  if (!f) return 'Elegí una fecha.';
+  if (f < hoyISO()) return 'No se puede reservar en una fecha pasada.';
+  if (f > fechaMax()) return `Se puede reservar con hasta ${CONFIG.DIAS_ANTICIPACION} días de anticipación.`;
+  if (esFinde(f)) return 'Las salas no se reservan los fines de semana.';
+  return '';
+}
+
+function opcionesInicio() {
+  const fecha = $('#fFecha').value, sala = $('#fSala').value;
+  const errFecha = validarFecha(fecha);
+  $('#fError').textContent = errFecha;
+  const rs = reservas.filter(r => r.sala === sala); // fechaActual siempre coincide con fFecha
+  const sel = $('#fInicio').value;
+  const disp = errFecha ? [] : slots().filter(m => !slotPasado(fecha, m) && !rs.some(r => ocupa(r, m)));
+  $('#fInicio').innerHTML = disp.length ? disp.map(m => `<option value="${m}">${aHora(m)}</option>`).join('') : '<option value="">Sin horarios</option>';
+  if (disp.includes(+sel) && sel !== '') $('#fInicio').value = sel;
+  opcionesDuracion();
+}
+
+function opcionesDuracion() {
+  const sala = $('#fSala').value, txt = $('#fInicio').value, inicio = +txt;
+  const sel = +$('#fDuracion').value;
+  const rs = reservas.filter(r => r.sala === sala);
+  const proxima = rs.filter(r => r.inicio > inicio).reduce((a, r) => Math.min(a, r.inicio), CONFIG.HORA_FIN);
+  const max = txt === '' ? 0 : Math.floor((proxima - inicio) / CONFIG.PASO) * CONFIG.PASO;
+  const ops = []; for (let d = CONFIG.PASO; d <= max; d += CONFIG.PASO) ops.push(d);
+  $('#fDuracion').innerHTML = ops.length ? ops.map(d => `<option value="${d}">${durTexto(d)}</option>`).join('') : '<option value="">—</option>';
+  if (ops.includes(sel)) $('#fDuracion').value = sel; else if (ops.includes(60)) $('#fDuracion').value = 60;
+  resumen();
+}
+
+function resumen() {
+  const fecha = $('#fFecha').value, inicio = +$('#fInicio').value, dur = +$('#fDuracion').value, n = +$('#fRepetir').value || 1;
+  let ok = $('#fInicio').value !== '' && dur > 0;
+  let txt = 'No hay horarios disponibles para esta sala y fecha.';
+  if (ok) {
+    txt = `<strong>${esc(nombreSala($('#fSala').value))}</strong> · ${fechaTexto(fecha, { weekday: 'short', day: 'numeric', month: 'short' })} · <strong>${aHora(inicio)} a ${aHora(inicio + dur)}</strong>`;
+    if (n > 1) {
+      const ultima = sumarDias(fecha, 7 * (n - 1));
+      txt += `<br>Se repite ${n} semanas, hasta el ${fechaTexto(ultima, { day: 'numeric', month: 'long' })}.`;
+      if (ultima > fechaMax()) { ok = false; txt += ` <span class="error">Supera el límite de ${CONFIG.DIAS_ANTICIPACION} días de anticipación.</span>`; }
+      else txt += ' <span class="nota">Si alguna semana está ocupada, te avisamos antes de reservar.</span>';
+    }
+  }
+  $('#btnConfirmar').disabled = !ok;
+  $('#fResumen').innerHTML = txt;
+}
+
+function abrirReserva(sala, inicio) {
+  const perfil = almacen.leer(K_PERFIL, {});
+  if (!$('#fNombre').value && perfil.nombre) $('#fNombre').value = perfil.nombre;
+  if (!$('#fEmail').value && perfil.email) $('#fEmail').value = perfil.email;
+  $('#fSala').value = sala;
+  $('#fFecha').value = fechaActual;
+  $('#fFecha').min = hoyISO();
+  $('#fFecha').max = fechaMax();
+  $('#fInicio').innerHTML = `<option value="${inicio}">${aHora(inicio)}</option>`;
+  $('#fInicio').value = inicio;
+  $('#fDuracion').value = '';
+  $('#fRepetir').value = '1';
+  opcionesInicio();
+  abrir('#modalReserva', $('#fNombre').value ? '#fMotivo' : '#fNombre');
+}
+
+async function confirmarReserva(ev) {
+  ev.preventDefault();
+  const err = $('#fError'); err.textContent = '';
+  const inicio = +$('#fInicio').value;
+  const datos = {
+    sala: $('#fSala').value, fecha: $('#fFecha').value,
+    inicio, fin: inicio + +$('#fDuracion').value,
+    repeticiones: +$('#fRepetir').value || 1,
+    nombre: $('#fNombre').value.trim(), email: usuario || $('#fEmail').value.trim(), motivo: $('#fMotivo').value.trim()
+  };
+  if (!datos.nombre) return err.textContent = 'Ingresá tu nombre.';
+  if (!emailValido(datos.email)) return err.textContent = `Usá tu email corporativo (@${CONFIG.DOMINIOS[0]}).`;
+  const ef = validarFecha(datos.fecha); if (ef) return err.textContent = ef;
+  const btn = $('#btnConfirmar'); btn.disabled = true; btn.textContent = 'Reservando…';
+  try {
+    const res = await api.crear(datos);
+    res.reservas.forEach(r => guardarToken(String(r.id), res.token, r.fecha));
+    almacen.guardar(K_PERFIL, { nombre: datos.nombre, email: datos.email });
+    cerrarModal($('#modalReserva'), false);
+    $('#fMotivo').value = '';
+    fechaActual = datos.fecha;
+    await cargar(true);
+    mostrarConfirmacion(datos, res);
+  } catch (e) {
+    if (datos.fecha === fechaActual) { await cargar(true); opcionesInicio(); }
+    err.textContent = e.message;
+  } finally { btn.textContent = 'Confirmar reserva'; resumen(); }
+}
+
+/* ---------- Confirmación y calendario ---------- */
+const qs = o => Object.entries(o).map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&');
+function eventoDe(d) {
+  return {
+    titulo: d.motivo || `Reunión · ${nombreSala(d.sala)}`,
+    lugar: `${nombreSala(d.sala)} · Close-Up International`,
+    detalle: `Reserva de ${nombreSala(d.sala)} a nombre de ${d.nombre}.`
+  };
+}
+function enlacesCalendario(d, n) {
+  const ev = eventoDe(d), off = offsetZona(d.fecha);
+  const compacto = m => `${d.fecha.replace(/-/g, '')}T${aHora(m).replace(':', '')}00`;
+  const google = { action: 'TEMPLATE', text: ev.titulo, dates: `${compacto(d.inicio)}/${compacto(d.fin)}`, ctz: CONFIG.ZONA, location: ev.lugar, details: ev.detalle };
+  if (n > 1) google.recur = `RRULE:FREQ=WEEKLY;COUNT=${n}`;
+  const outlook = { subject: ev.titulo, startdt: `${d.fecha}T${aHora(d.inicio)}:00${off}`, enddt: `${d.fecha}T${aHora(d.fin)}:00${off}`, location: ev.lugar, body: ev.detalle };
+  return {
+    google: `https://calendar.google.com/calendar/render?${qs(google)}`,
+    outlook: `https://outlook.office.com/calendar/0/deeplink/compose?${qs(outlook)}`
+  };
+}
+function icsDe(d, n, uid) {
+  const ev = eventoDe(d), off = offsetZona(d.fecha);
+  const utc = m => new Date(`${d.fecha}T${aHora(m)}:00${off}`).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  const t = s => String(s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+  return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Close-Up International//Reserva de Salas//ES', 'METHOD:PUBLISH', 'BEGIN:VEVENT',
+    `UID:${uid}@reserva-salas`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')}`,
+    `DTSTART:${utc(d.inicio)}`, `DTEND:${utc(d.fin)}`, ...(n > 1 ? [`RRULE:FREQ=WEEKLY;COUNT=${n}`] : []),
+    `SUMMARY:${t(ev.titulo)}`, `LOCATION:${t(ev.lugar)}`, `DESCRIPTION:${t(ev.detalle)}`, 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+}
+
+function mostrarConfirmacion(d, res) {
+  const n = res.reservas.length;
+  ultimaConfirmada = { d, n, uid: res.reservas[0].serie || res.reservas[0].id };
+  let txt = `<strong>${esc(nombreSala(d.sala))}</strong> · ${fechaTexto(d.fecha, { weekday: 'long', day: 'numeric', month: 'long' })} · <strong>${aHora(d.inicio)} a ${aHora(d.fin)}</strong>`;
+  if (n > 1) txt += `<br>Todas las semanas, ${n} veces (hasta el ${fechaTexto(res.reservas[n - 1].fecha, { day: 'numeric', month: 'long' })}).`;
+  $('#okResumen').innerHTML = txt;
+  $('#okNota').textContent = !enAppsScript
+    ? 'En modo demostración no se envían emails.'
+    : res.email
+      ? `Te enviamos la confirmación a ${d.email}, con el evento para tu calendario y un link para cancelar.`
+      : 'Podés cancelarla desde este navegador (botón "Mis reservas").';
+  const l = enlacesCalendario(d, n);
+  $('#okOutlook').href = l.outlook;
+  $('#okOutlook').title = n > 1 ? 'Outlook agrega solo la primera fecha; para la serie completa usá el .ics' : '';
+  $('#okGoogle').href = l.google;
+  abrir('#modalOk');
+}
+
+function descargarIcs() {
+  if (!ultimaConfirmada) return;
+  const { d, n, uid } = ultimaConfirmada;
+  const url = URL.createObjectURL(new Blob([icsDe(d, n, uid)], { type: 'text/calendar' }));
+  const a = Object.assign(document.createElement('a'), { href: url, download: `reserva-${d.fecha}.ics` });
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/* ---------- Detalle / cancelación ---------- */
+function abrirDetalle(id, tokenExtra) {
+  reservaSel = reservas.find(r => r.id === String(id)); if (!reservaSel) return;
+  const r = reservaSel;
+  if (tokenExtra) guardarToken(r.id, tokenExtra, r.fecha);
+  const fin = terminada(r);
+  const puede = !fin && (!!tokenDe(r.id) || r.propia);
+  $('#tituloDetalle').textContent = nombreSala(r.sala);
+  $('#dDetalle').innerHTML = `
+    <dt>Fecha y horario</dt><dd>${fechaTexto(r.fecha, { weekday: 'long', day: 'numeric', month: 'long' })} · ${aHora(r.inicio)} a ${aHora(r.fin)} (${durTexto(r.fin - r.inicio)})</dd>
+    <dt>Reservado por</dt><dd>${esc(r.nombre)}</dd>
+    ${r.motivo ? `<dt>Motivo</dt><dd>${esc(r.motivo)}</dd>` : ''}
+    ${r.serie ? `<dt>Repetición</dt><dd>Forma parte de una reserva semanal</dd>` : ''}`;
+  $('#btnCancelarReserva').hidden = !puede;
+  $('#cSerieFila').hidden = !(puede && r.serie);
+  $('#cSerie').checked = false;
+  $('#cNota').textContent = fin ? 'Esta reserva ya pasó.'
+    : puede ? '' : 'Solo quien hizo la reserva puede cancelarla: desde el link del email de confirmación o desde el navegador con el que reservó.';
+  $('#cError').textContent = '';
+  abrir('#modalDetalle');
+}
+
+async function cancelarReserva(ev) {
+  ev.preventDefault();
+  const r = reservaSel; if (!r) return;
+  const btn = $('#btnCancelarReserva'); btn.disabled = true; btn.textContent = 'Cancelando…';
+  try {
+    const res = await api.cancelar(r.id, tokenDe(r.id), $('#cSerie').checked);
+    const ids = (res && res.canceladas) || [r.id];
+    ids.forEach(id => quitarToken(String(id)));
+    cerrarModal($('#modalDetalle'), false);
+    toast(ids.length > 1 ? `${ids.length} reservas canceladas` : 'Reserva cancelada');
+    await cargar(true);
+  } catch (e) { $('#cError').textContent = e.message; }
+  finally { btn.disabled = false; btn.textContent = 'Cancelar reserva'; }
+}
+
+/* ---------- Mis reservas ---------- */
+async function abrirMisReservas() {
+  const ul = $('#listaMis');
+  ul.innerHTML = '<li class="nota">Cargando…</li>';
+  $('#misNota').textContent = usuario ? '' : 'Se muestran las reservas hechas desde este navegador.';
+  abrir('#modalMis');
+  try {
+    const l = await api.misReservas(misTokens().map(({ id, token }) => ({ id, token })));
+    ul.innerHTML = l.length ? l.map(r => `<li><button type="button" data-fecha="${esc(r.fecha)}" data-id="${esc(r.id)}">
+        <span class="m-fecha">${esc(fechaTexto(r.fecha, { weekday: 'short', day: 'numeric', month: 'short' }))} · ${aHora(r.inicio)} a ${aHora(r.fin)}</span>
+        <span class="m-txt">${esc(nombreSala(r.sala))}${r.serie ? ' · semanal' : ''}</span>
+        ${r.motivo ? `<span class="m-sub">${esc(r.motivo)}</span>` : ''}
+      </button></li>`).join('')
+      : '<li class="nota">No tenés reservas próximas.</li>';
+  } catch (e) { ul.innerHTML = `<li class="error">${esc(e.message)}</li>`; }
+}
+
+async function irAReserva(fecha, id, token) {
+  fechaActual = fecha;
+  await cargar();
+  abrirDetalle(id, token);
+}
+
+let toastT;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('visible'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('visible'), 3500); }
+
+/* ---------- Eventos ---------- */
+$('#btnAnt').onclick = () => moverDia(-1);
+$('#btnSig').onclick = () => moverDia(1);
+$('#btnHoy').onclick = () => { fechaActual = hoyISO(); cargar(); };
+$('#btnMis').onclick = abrirMisReservas;
+$('#inputFecha').onchange = e => { if (e.target.value) { fechaActual = e.target.value; cargar(); } };
+$('#grilla').addEventListener('click', e => {
+  const c = e.target.closest('.celda:not([disabled])'); if (c) return abrirReserva(c.dataset.sala, +c.dataset.inicio);
+  const r = e.target.closest('.reserva'); if (r) return abrirDetalle(r.dataset.id);
+  const ir = e.target.closest('[data-ir]'); if (ir) { fechaActual = ir.dataset.ir; return cargar(); }
+  if (e.target.closest('[data-reintentar]')) cargar();
+});
+$('#listaMis').addEventListener('click', e => {
+  const b = e.target.closest('button[data-id]'); if (!b) return;
+  cerrarModal($('#modalMis'), false);
+  irAReserva(b.dataset.fecha, b.dataset.id);
+});
+$('#fSala').onchange = opcionesInicio;
+$('#fFecha').onchange = async () => {
+  const f = $('#fFecha').value; if (!f) return;
+  if (f !== fechaActual) { fechaActual = f; await cargar(true); }
+  opcionesInicio();
+};
+$('#fInicio').onchange = opcionesDuracion;
+$('#fDuracion').onchange = resumen;
+$('#fRepetir').onchange = resumen;
+$('#formReserva').onsubmit = confirmarReserva;
+$('#formCancelar').onsubmit = cancelarReserva;
+$('#okIcs').onclick = descargarIcs;
+document.querySelectorAll('[data-cerrar]').forEach(b => b.onclick = () => cerrarModal(b.closest('.fondo')));
+document.querySelectorAll('.fondo').forEach(f => f.addEventListener('mousedown', e => { if (e.target === f) cerrarModal(f); }));
+document.addEventListener('keydown', e => {
+  const abierto = [...document.querySelectorAll('.fondo.abierto')].pop();
+  if (!abierto) return;
+  if (e.key === 'Escape') return cerrarModal(abierto);
+  if (e.key === 'Tab') { // mantiene el foco dentro del modal
+    const f = focusables(abierto); if (!f.length) return;
+    const primero = f[0], ultimo = f[f.length - 1];
+    if (!abierto.contains(document.activeElement)) { e.preventDefault(); primero.focus(); }
+    else if (e.shiftKey && document.activeElement === primero) { e.preventDefault(); ultimo.focus(); }
+    else if (!e.shiftKey && document.activeElement === ultimo) { e.preventDefault(); primero.focus(); }
+  }
+});
+
+/* ---------- Inicio ---------- */
+async function iniciar() {
+  try {
+    const inf = await api.info();
+    if (inf && inf.config) Object.assign(CONFIG, inf.config);
+    usuario = (inf && inf.usuario) || '';
+  } catch (e) { /* seguimos con la configuración local; cargar() mostrará el error */ }
+
+  if (!enAppsScript) $('#avisoDemo').hidden = false;
+  $('#eyebrowHorario').textContent = `Disponibilidad · ${aHora(CONFIG.HORA_INICIO)} a ${aHora(CONFIG.HORA_FIN)} h`;
+  $('#grilla').style.setProperty('--salas', CONFIG.SALAS.length);
+  $('#fSala').innerHTML = CONFIG.SALAS.map(s => `<option value="${esc(s.id)}">${esc(s.nombre)}</option>`).join('');
+  let rep = '<option value="1">No se repite</option>';
+  for (let n = 2; n <= CONFIG.MAX_REPETICIONES; n++) rep += `<option value="${n}">Cada semana · ${n} veces</option>`;
+  $('#fRepetir').innerHTML = rep;
+  $('#inputFecha').max = fechaMax();
+  if (usuario) { $('#campoEmail').hidden = true; $('#pieUsuario').textContent = usuario; }
+
+  fechaActual = hoyISO();
+  await cargar();
+
+  // Link de cancelación del email: ?cancelar=<id>&token=<token>
+  if (enAppsScript && google.script.url) {
+    google.script.url.getLocation(async loc => {
+      const p = (loc && loc.parameter) || {};
+      if (!p.cancelar) return;
+      try {
+        const r = await api.obtener(p.cancelar);
+        if (!r) return toast('Esa reserva ya no existe o ya fue cancelada.');
+        await irAReserva(r.fecha, String(r.id), p.token);
+      } catch (e) { toast(e.message); }
+    });
+  }
+
+  setInterval(() => { if (!document.querySelector('.fondo.abierto') && !document.hidden) cargar(true); }, CONFIG.REFRESCO_SEG * 1000);
+}
+iniciar();
+</script>
+</body>
+</html>
